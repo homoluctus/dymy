@@ -1,0 +1,9 @@
+# flake8: noqa
+
+INSERT_DYNAMODB_RECORD_TO_MYSQL = '''
+LOAD DATA LOCAL INFILE '{filepath}'
+IGNORE INTO TABLE {table}
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+({columns})
+'''

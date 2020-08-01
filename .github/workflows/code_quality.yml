@@ -1,0 +1,43 @@
+name: Code Quality
+
+on:
+  pull_request:
+    paths:
+      - 'dymy/**'
+      - 'mypy.ini'
+      - '.flake8'
+      - 'poetry.lock'
+      - 'pyproject.toml'
+
+jobs:
+  mypy:
+    name: Mypy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Execute mypy
+        run: make mypy
+
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Execute list check
+        run: make lint
