@@ -3,7 +3,7 @@ from typing import Any, ClassVar, Dict, Iterable, Tuple
 
 from dymy._constant import DYNAMODB_QUERY_OPERATION, DYNAMODB_SCAN_OPERATION
 from dymy.db.dynamodb import DynamoDBClient, DynamoDBItemsType
-from dymy.models.arg import (
+from dymy.models.dynamodb.arg import (
     Boto3ResourceArgs, DynamoDBArgs, DynamoDBQueryArgs, DynamoDBScanArgs
 )
 
