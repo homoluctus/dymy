@@ -1,45 +1,55 @@
-from dataclasses import dataclass, field
-from time import sleep
-from typing import Any, Dict, List
+from dataclasses import InitVar, dataclass, field
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import boto3
 from mypy_boto3_dynamodb.service_resource import Table as DynamoDBTable
-from mypy_boto3_dynamodb.type_defs import ScanOutputTypeDef
+from mypy_boto3_dynamodb.type_defs import QueryOutputTypeDef, ScanOutputTypeDef
 
+from dymy.exceptions import DynamoDBInvalidOperationError
+from dymy.models.arg import Boto3ResourceArgs
 from dymy.utils import get_logger
 
 
 logger = get_logger(__name__)
 
+DynamoDBItemsType = List[Dict[str, Any]]
+DynamoDBSelectOutputType = Union[QueryOutputTypeDef, ScanOutputTypeDef]
+DynamoDBSelectOperationType = Callable[..., DynamoDBSelectOutputType]
+
 
 @dataclass
 class DynamoDBClient:
-    table: DynamoDBTable = field(init=False)
+    table_name: InitVar[str]
+    resource_args: InitVar[Boto3ResourceArgs]
 
-    def __post_init__(self):
-        resource = boto3.resource(
-            service_name=self.service_name,
-            region_name=self.region,
-            endpoint_url=self.endpoint,
-        )
-        self.table = resource.Table(self.table.table_name)
+    _table: DynamoDBTable = field(init=False)
+    _operation: Optional[DynamoDBSelectOperationType] = field(
+        init=False, default=None)
 
-    def scan(self, **kwargs: Any) -> List[Dict[str, Any]]:
-        response: ScanOutputTypeDef = self.table.scan(**kwargs)
+    def __post_init__(
+            self,
+            table_name: str,
+            resource_args: Boto3ResourceArgs) -> None:
+        resource = boto3.resource(**resource_args.to_dict())
+        self._table = resource.Table(table_name)
 
-        items: List[Dict[str, Any]] = []
-        if not (raw_items := response['Items']):
-            return items
+    def _get_opeation(self, operation_name: str) -> DynamoDBSelectOperationType:
+        if self._operation is None:
+            if operation_name in ['query', 'scan']:
+                raise DynamoDBInvalidOperationError(operation_name)
+            self._operation = getattr(self._table, operation_name)
+        return self._operation
 
-        items.extend(raw_items)
+    def select(self, operation_name: str, **kwargs: Any) -> DynamoDBItemsType:
+        operation = self._get_opeation(operation_name)
+        response: DynamoDBSelectOutputType = operation(**kwargs)
 
-        if (v := response.get('LastEvaluatedKey')):
-            # prevent to throttle
-            sleep(0.5)
+        if not (items := response['Items']):
+            return []
 
-            kwargs.pop('ExclusiveStartKey', None)
-            tmp = self.scan(
-                ExclusiveStartKey=v, **kwargs)
+        if (last_key := response.get('LastEvaluatedKey')):
+            kwargs['ExclusiveStartKey'] = last_key
+            tmp = self.select(operation_name, **kwargs)
             items.extend(tmp)
 
         return items

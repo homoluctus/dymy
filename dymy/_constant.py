@@ -7,6 +7,10 @@ from dymy.utils import get_logger
 logger = get_logger(__name__)
 
 DYNAMODB_ENDPOINT = get_env('DYNAMODB_ENDPOINT', ignore_error=True)
+
+DYNAMODB_QUERY_OPERATION = 'query'
+DYNAMODB_SCAN_OPERATION = 'query'
+
 AWS_DEFAULT_REGION = get_env('AWS_DEFAULT_REGION', ignore_error=True)
 AWS_ACCESS_KEY_ID = get_env('AWS_ACCESS_KEY_ID', ignore_error=True)
 AWS_SECRET_ACCESS_KEY = get_env('AWS_SECRET_ACCESS_KEY', ignore_error=True)

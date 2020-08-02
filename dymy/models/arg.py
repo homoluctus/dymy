@@ -1,38 +1,33 @@
-from dataclasses import asdict, dataclass, fields
-from typing import Any, ClassVar, Dict, Optional, Tuple
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, Optional, Union
 
+from dymy._constant import (
+    AWS_ACCESS_KEY_ID, AWS_DEFAULT_REGION, AWS_SECRET_ACCESS_KEY,
+    AWS_SESSION_TOKEN, DYNAMODB_ENDPOINT
+)
 from dymy.utils import snake2pascal
 
 
 @dataclass
-class DynamoDBModel:
-    """DynamoDB base model"""
+class Boto3ResourceArgs:
+    """Model class for boto3.resource arguments"""
 
-    mode: ClassVar[str]
-    table_name: ClassVar[str]
+    region_name: Optional[str] = AWS_DEFAULT_REGION
+    api_version: Optional[str] = None
+    use_ssl: bool = True
+    verify: Optional[Union[str, bool]] = None
+    endpoint_url: Optional[str] = DYNAMODB_ENDPOINT
+    aws_access_key_id: Optional[str] = AWS_ACCESS_KEY_ID
+    aws_secret_access_key: Optional[str] = AWS_SECRET_ACCESS_KEY
+    aws_session_token: Optional[str] = AWS_SESSION_TOKEN
+    service_name: str = field(init=False, default='dynamodb')
 
-    @property
-    def item(self) -> Dict[str, Any]:
-        return asdict(self)
-
-    @classmethod
-    def schema(cls) -> Tuple[str, ...]:
-        schema = tuple(f.name for f in fields(cls))
-        return schema
-
-
-@dataclass
-class DynamoDBQueryModel(DynamoDBModel):
-    """DynamoDBModel for query operation"""
-
-    mode: ClassVar[str] = 'query'
-
-
-@dataclass
-class DynamoDBScanModel(DynamoDBModel):
-    """DynamoDBModel for scan operation"""
-
-    mode: ClassVar[str] = 'scan'
+    def to_dict(self) -> Dict[str, Any]:
+        self_dict = {
+            k: v for k, v in asdict(self).items()
+            if v is not None
+        }
+        return self_dict
 
 
 @dataclass
