@@ -6,7 +6,7 @@ from mypy_boto3_dynamodb.service_resource import Table as DynamoDBTable
 from mypy_boto3_dynamodb.type_defs import QueryOutputTypeDef, ScanOutputTypeDef
 
 from dymy.exceptions import DynamoDBInvalidOperationError
-from dymy.models.arg import Boto3ResourceArgs
+from dymy.models.dynamodb.arg import Boto3ResourceArgs
 from dymy.utils import get_logger
 
 

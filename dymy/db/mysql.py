@@ -73,8 +73,8 @@ class Connection:
     def insert(
             self,
             sql: str,
-            *,
             params: Optional[Union[Dict[str, Any], List[Any]]] = None,
+            *,
             rollback: bool = True) -> int:
         rowcount = 0
         conn = self.get_connection()
