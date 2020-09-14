@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pymysql = "^0.10.0"
+pymysql = "^0.10.1"
 boto3 = "^1.14.47"
 boto3-stubs = {extras = ["dynamodb"], version = "^1.14.43"}
 
